@@ -25,8 +25,8 @@ class PDOSessionRepository extends PDORepository
     {
     	$data = $this->query(array('session_id' => $sessionId), 1);
 
-        if ($data->execute(array($sessionId))) {
-            $this->records[] = $data->fetch(\PDO::FETCH_ASSOC);
+        if ($data->execute(array($sessionId)) && $results = $data->fetch(\PDO::FETCH_ASSOC)) {
+            $this->records[] = $results;
         }
 
         return $this;

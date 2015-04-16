@@ -16,14 +16,14 @@ class Session {
 
 		$this->handler = new $handler($di);
 
-		session_set_save_handler($this->handler, true);
-
 		return $this;
 	}
 
 	public function start()
 	{
+		session_set_save_handler($this->handler, true);
 		session_start();
+		return $this;
 	}
 
 	public function get($key)

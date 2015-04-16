@@ -55,7 +55,7 @@ class PDO implements \SessionHandlerInterface {
      * @return string            The serialized session data.
      */
     public function read($sessionId) {
-        $session = $this->repo->findBySessionId($sessionId)->getResults('Session\Entities\PDOSession');
+        $session = $this->repo->getBySessionId($sessionId)->getResults('Session\Entities\PDOSession');
         return $session;
     }
  
@@ -70,8 +70,9 @@ class PDO implements \SessionHandlerInterface {
     public function write($sessionId, $sessionData) {
 
         $results = $this->repo->getBySessionId($sessionId);
-        $session = $results->getResults('Session\Entities\PDOSession');
-        if($session){
+        var_dump($results);
+        if($results){
+            $session = $results->getResults('Session\Entities\PDOSession');
             $session->setData($sessionData);
             $this->mapper->update($session, $session->id);
         } else {
