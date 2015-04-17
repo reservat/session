@@ -49,7 +49,7 @@ class PDOSession extends Entity implements EntityInterface
         $this->data = $data;
     }
 
-    public function getData($data)
+    public function getData()
     {
         return $this->data;
     }
