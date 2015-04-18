@@ -19,7 +19,7 @@ class PDOSessionDatamapper extends PDODatamapper implements SQLDatamapperInterfa
 
     public function deleteBySessionId($sessionId)
     {
-    	$query = 'DELETE FROM '.$this->table().' WHERE id = ?';
+        $query = 'DELETE FROM '.$this->table().' WHERE id = ?';
         $this->execute($query, array($sessionId));
     }
 
@@ -28,5 +28,4 @@ class PDOSessionDatamapper extends PDODatamapper implements SQLDatamapperInterfa
         $query = 'DELETE FROM '.$this->table().' WHERE expires < UNIX_TIMESTAMP()';
         $this->execute($query);
     }
-    
 }

@@ -8,6 +8,18 @@ use Aura\Di\Factory;
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
     protected $di = null;
+    protected $sessionId;
+    protected $sessionData;
+    protected $session;
+
+    public function __construct()
+    {
+        if (session_status() != PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        ob_start();
+    }
 
     public function setUp()
     {
@@ -15,7 +27,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         CREATE TABLE "session" (
         "id" INTEGER PRIMARY KEY,
         "session_id" VARCHAR NOT NULL,
-        "user_id" VARCHAR NOT NULL,
+        "user_id" INT,
         "data" TEXT,
         "expires" INT
         );
@@ -28,17 +40,51 @@ SQL;
 
         $this->di->get('db')->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->di->get('db')->exec($schema);
+
+        $testSessionData = [
+            1,
+            'k4o6898jdru8e8gah9mkv5fss5',
+            14,
+            'ohhai|i:1;userId|i:14;',
+            (new \DateTime())->getTimeStamp() + 1000
+        ];
+
+        $sql = "INSERT INTO session (id, session_id, user_id, data, expires) VALUES ('". implode("','", $testSessionData) ."')";
+        $this->di->get('db')->exec($sql);
+
     }
 
-    public function testSession()
+    public function testSetPDOSession()
     {
+
         $session = new \Reservat\Session\Session($this->di, 'PDO');
+
         $session->set('ohhai', 1);
+        $session->set('userId', 12);
+
+        $this->assertEquals($session->get('ohhai'), 1);
+        $this->assertEquals($session->get('userId'), 12);
+
     }
 
-    public function testGetSession()
+
+    public function testGetPDOSession()
     {
+
         $session = new \Reservat\Session\Session($this->di, 'PDO');
-        var_dump($session->get('ohhai'));
+
+        session_id('k4o6898jdru8e8gah9mkv5fss5');
+
+        //session_decode($this->sessionData);
+
+        $handler = $session->getHandler();
+        session_decode($handler->read('k4o6898jdru8e8gah9mkv5fss5'));
+
+        $this->assertEquals($session->get('ohhai'), 1);
+        $this->assertEquals($session->get('userId'), 14);
+
+        $rawSession = $handler->getRaw(session_id());
+        $this->assertEquals($rawSession->getUserId(), 14);
+
     }
 }

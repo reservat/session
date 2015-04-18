@@ -7,7 +7,8 @@ use Reservat\Session\Repository\PDOSessionRepository;
 use Reservat\Session\Entities\PDOSession;
 use Reservat\Core\Log;
 
-class PDO implements \SessionHandlerInterface {
+class PDO implements \SessionHandlerInterface
+{
 
     private $di;
     private $maxLifetime;
@@ -15,7 +16,7 @@ class PDO implements \SessionHandlerInterface {
     protected $repo;
     protected $mapper;
 
-    public function __construct($di, $config = array()) 
+    public function __construct($di, $config = array())
     {
         $this->di = $di;
         $this->repo = new PDOSessionRepository($this->di->get('db'));
@@ -23,17 +24,27 @@ class PDO implements \SessionHandlerInterface {
         $this->maxLifetime = isset($config['maxLifetime']) ? $config['maxLifetime'] : ini_get('session.gc_maxlifetime');
     }
 
-    /** 
+    /**
      * Called by the Reservat session handler to initialise.
-     * This should only be called **ONCE** 
+     * This should only be called **ONCE**
      */
     public function start()
-    {   
+    {
         // Better to be safe than sorry.
-        if(!headers_sent()){
+        if (!headers_sent()) {
             session_start();
         } else {
             Log::error('Tried to start session after headers sent. '.get_class());
+        }
+    }
+
+    public function getRaw($sessionId)
+    {
+        $session = $this->repo->getBySessionId($sessionId)->getResults(new PDOSession());
+        if ($session) {
+            return $session;
+        } else {
+            return false;
         }
     }
 
@@ -41,14 +52,15 @@ class PDO implements \SessionHandlerInterface {
      * We don't need to do anything extra to initialize the session since
      * we get PDO in constructor
      */
-    public function open($savePath, $name) 
-    { }
+    public function open($savePath, $name)
+    {
+    }
 
     /**
      * We need to clean up old sessions
      * @param  [type] $maxLifetime [description]
      */
-    public function gc($maxLifetime) 
+    public function gc($maxLifetime)
     {
         $this->mapper->deleteExpired();
     }
@@ -56,48 +68,48 @@ class PDO implements \SessionHandlerInterface {
     /**
      * Close the current session by disconnecting from mysql
      */
-    public function close() 
+    public function close()
     {
         unset($this->pdo);
     }
  
     /**
      * Destroys the session by deleting the row from mysql
-     * 
+     *
      * @param  string $sessionId The session id.
      */
-    public function destroy($sessionId) 
+    public function destroy($sessionId)
     {
         $this->mapper->deletebySessionId($sessionId);
     }
 
     /**
      * Read the session data from mysql.
-     * 
+     *
      * @param  string $sessionId The session id.
      * @return string            The serialized session data.
      */
-    public function read($sessionId) 
+    public function read($sessionId)
     {
-        $session = $this->repo->getBySessionId($sessionId)->getResults(new PDOSession(), new PDOSessionRepository($this->di->get('db')));
-        if($session){
+        $session = $this->getRaw($sessionId);
+        if ($session) {
             return $session->getData();
         } else {
             return false;
         }
-    }   
+    }
  
     /**
      * Write the serialized session data to mysql.
-     * 
+     *
      * @param  string $sessionId   The session id.
      * @param  string $sessionData The serialized session data.
      */
-    public function write($sessionId, $sessionData) 
+    public function write($sessionId, $sessionData)
     {
         try {
-            $result = $this->repo->getBySessionId($sessionId)->getResults(new PDOSession(), new PDOSessionRepository($this->di->get('db')));
-            if($result){
+            $result = $this->repo->getBySessionId($sessionId)->getResults(new PDOSession());
+            if ($result) {
                 $result->setData($sessionData);
                 $this->mapper->update($result, $result->id);
             } else {
@@ -107,8 +119,7 @@ class PDO implements \SessionHandlerInterface {
                 $this->mapper->save($session);
             }
         } catch (\Exception $e) {
-            Log::debug('session error', [$e]);
+            Log::debug('session error', [$e->getMessage()]);
         }
     }
-
 }

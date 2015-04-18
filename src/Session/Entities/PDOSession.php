@@ -39,7 +39,7 @@ class PDOSession extends Entity implements EntityInterface
         $this->userId = $userId;
     }
 
-    public function getUserId($userId)
+    public function getUserId()
     {
         return $this->userId;
     }
@@ -72,5 +72,10 @@ class PDOSession extends Entity implements EntityInterface
             'data' => $this->data,
             'expires' => $this->expires,
         ];
+    }
+
+    public function __toString()
+    {
+        return get_class();
     }
 }

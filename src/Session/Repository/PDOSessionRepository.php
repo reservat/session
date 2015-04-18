@@ -3,6 +3,7 @@
 namespace Reservat\Session\Repository;
 
 use Reservat\Core\Repository\PDORepository;
+use Reservat\Core\DateTime;
 
 class PDOSessionRepository extends PDORepository
 {
@@ -17,15 +18,18 @@ class PDOSessionRepository extends PDORepository
     }
 
     public static $fillable = [
-    	'session_id' => 'sessionId',
-    	'user_id' => 'userId'
+        'session_id' => 'sessionId',
+        'user_id' => 'userId'
     ];
 
     public function getBySessionId($sessionId)
     {
-    	$data = $this->sessionNotExpiredQuery(1);
+        $data = $this->sessionNotExpiredQuery(1);
+        $datetime = new DateTime();
 
-        if ($data->execute(array($sessionId)) && $results = $data->fetch(\PDO::FETCH_ASSOC)) {
+        $this->records = [];
+        
+        if ($data->execute(array($sessionId, $datetime->getTimestamp())) && $results = $data->fetch(\PDO::FETCH_ASSOC)) {
             $this->records[] = $results;
         }
 
@@ -33,14 +37,14 @@ class PDOSessionRepository extends PDORepository
     }
 
     protected function sessionNotExpiredQuery($limit)
-    {   
+    {
         $query = 'SELECT * FROM '.$this->table().' WHERE ';
-        $query .= 'session_id = ? AND expires > UNIX_TIMESTAMP()';
+        $query .= 'session_id = ? AND expires > ?';
 
         $query = $query.' LIMIT '.intval($limit);
+
         $db = $this->db->prepare($query);
 
         return $db;
     }
-
 }
