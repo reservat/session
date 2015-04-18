@@ -22,13 +22,17 @@ class Session {
 	public function start()
 	{
 		session_set_save_handler($this->handler, true);
-		session_start();
+		$this->handler->start();
 		return $this;
 	}
 
 	public function get($key)
 	{
-		return $_SESSION[$key];
+		if (isset($_SESSION[$key])) {
+			return $_SESSION[$key];
+		} else {
+			return false;
+		}
 	}
 
 	public function set($key, $value)

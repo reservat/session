@@ -23,13 +23,24 @@ class PDOSessionRepository extends PDORepository
 
     public function getBySessionId($sessionId)
     {
-    	$data = $this->query(array('session_id' => $sessionId), 1);
+    	$data = $this->sessionNotExpiredQuery(1);
 
         if ($data->execute(array($sessionId)) && $results = $data->fetch(\PDO::FETCH_ASSOC)) {
             $this->records[] = $results;
         }
 
         return $this;
+    }
+
+    protected function sessionNotExpiredQuery($limit)
+    {   
+        $query = 'SELECT * FROM '.$this->table().' WHERE ';
+        $query .= 'session_id = ? AND expires > UNIX_TIMESTAMP()';
+
+        $query = $query.' LIMIT '.intval($limit);
+        $db = $this->db->prepare($query);
+
+        return $db;
     }
 
 }
