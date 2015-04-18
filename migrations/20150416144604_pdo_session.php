@@ -2,8 +2,6 @@
 
 use Phinx\Migration\AbstractMigration;
 
-namespace Reservat\Migrations;
-
 class PdoSession extends AbstractMigration
 {
     /**

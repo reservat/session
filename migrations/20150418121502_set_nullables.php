@@ -2,9 +2,9 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class ExpiryToTimestamp extends AbstractMigration
+class SetNullables extends AbstractMigration
 {
-    
+
     /**
      * Migrate Up.
      */
@@ -12,7 +12,8 @@ class ExpiryToTimestamp extends AbstractMigration
     {
         $table = $this->table('session');
         $table
-            ->changeColumn('expires', 'integer')
+            ->changeColumn('data', 'text', ['null' => true])
+            ->changeColumn('user_id', 'text', ['null' => true])
             ->save();
     }
 
@@ -23,7 +24,9 @@ class ExpiryToTimestamp extends AbstractMigration
     {
         $table = $this->table('session');
         $table
-            ->changeColumn('expires', 'datetime')
+            ->changeColumn('data', 'text', ['null' => false])
+            ->changeColumn('user_id', 'text', ['null' => false])
             ->save();
     }
+    
 }
