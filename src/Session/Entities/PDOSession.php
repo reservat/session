@@ -73,9 +73,4 @@ class PDOSession extends Entity implements EntityInterface
             'expires' => $this->expires,
         ];
     }
-
-    public function __toString()
-    {
-        return get_class();
-    }
 }
