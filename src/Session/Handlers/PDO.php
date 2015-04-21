@@ -40,9 +40,10 @@ class PDO implements \SessionHandlerInterface
 
     public function getRaw($sessionId)
     {
-        $session = $this->repo->getBySessionId($sessionId)->getResults(new PDOSession());
+        $session = $this->repo->getBySessionId($sessionId)->getResults();
+
         if ($session) {
-            return $session;
+            return PDOSession::createFromArray($session);
         } else {
             return false;
         }

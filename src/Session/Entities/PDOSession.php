@@ -16,7 +16,7 @@ class PDOSession extends Entity implements EntityInterface
 
     protected $expires = null;
 
-    public function __construct($sessionId = null, $userId = null, $data = null, $expires = null)
+    public function __construct($sessionId, $userId, $data, $expires)
     {
         $this->sessionId = $sessionId;
         $this->userId = $userId;
@@ -72,5 +72,10 @@ class PDOSession extends Entity implements EntityInterface
             'data' => $this->data,
             'expires' => $this->expires,
         ];
+    }
+
+    public static function createFromArray(array $data)
+    {
+        return new static($data['session_id'], $data['user_id'], $data['data'], $data['expires']);
     }
 }
